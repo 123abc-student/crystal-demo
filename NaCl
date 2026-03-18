@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NaCl 晶体结构教学交互模型</title>
+    <meta charset="utf-8">
+    <script src="https://3dmol.org/build/3Dmol-min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 0; overflow: hidden; background-color: #f0f0f0; }
+        #container { width: 100vw; height: 100vh; position: relative; }
+        .controls { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.8); 
+                    padding: 15px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 100; }
+        button { cursor: pointer; padding: 8px 12px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        .na-label { color: blue; font-weight: bold; }
+        .cl-label { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <h3>NaCl 晶体结构演示</h3>
+    <p>视图切换：</p>
+    <button onclick="setView('stick')">球棍模型 (Stick)</button>
+    <button onclick="setView('sphere')">空间填充 (VDW)</button>
+    <hr>
+    <p>原子显隐：</p>
+    <button onclick="toggleAtoms('Na')">显示/隐藏 Na+ (蓝色)</button>
+    <button onclick="toggleAtoms('Cl')">显示/隐藏 Cl- (绿色)</button>
+    <p style="font-size: 0.8em; color: #666;">鼠标左键旋转 | 右键平移 | 滚轮缩放</p>
+</div>
+
+<div id="container" class="viewer_3Dmoljs" data-backgroundcolor="0xeeeeee"></div>
+
+<script>
+    // 定义 NaCl 的小型晶格数据 (PDB 格式字符串)
+    const naclData = `
+HETATM    1 Na   NA  A   1       0.000   0.000   0.000  1.00  0.00          Na
+HETATM    2 Na   NA  A   1       2.820   2.820   0.000  1.00  0.00          Na
+HETATM    3 Na   NA  A   1       2.820   0.000   2.820  1.00  0.00          Na
+HETATM    4 Na   NA  A   1       0.000   2.820   2.820  1.00  0.00          Na
+HETATM    5 Cl   CL  A   1       2.820   0.000   0.000  1.00  0.00          Cl
+HETATM    6 Cl   CL  A   1       0.000   2.820   0.000  1.00  0.00          Cl
+HETATM    7 Cl   CL  A   1       0.000   0.000   2.820  1.00  0.00          Cl
+HETATM    8 Cl   CL  A   1       2.820   2.820   2.820  1.00  0.00          Cl
+TER
+`;
+
+    let viewer = null;
+    let showNa = true;
+    let showCl = true;
+    let currentStyle = 'stick';
+
+    // 初始化查看器
+    $(function() {
+        viewer = $3Dmol.createViewer($("#container"));
+        viewer.addModel(naclData, "pdb");
+        updateView();
+        viewer.zoomTo();
+    });
+
+    function updateView() {
+        viewer.removeAllShapes();
+        const naStyle = showNa ? (currentStyle === 'stick' ? {stick:{color:'blue', radius:0.2}, sphere:{color:'blue', radius:0.4}} : {sphere:{color:'blue', radius:1.16}}) : {};
+        const clStyle = showCl ? (currentStyle === 'stick' ? {stick:{color:'green', radius:0.2}, sphere:{color:'green', radius:0.6}} : {sphere:{color:'green', radius:1.67}}) : {};
+        
+        viewer.setStyle({elem: 'Na'}, naStyle);
+        viewer.setStyle({elem: 'Cl'}, clStyle);
+        viewer.render();
+    }
+
+    function setView(type) {
+        currentStyle = type;
+        updateView();
+    }
+
+    function toggleAtoms(type) {
+        if(type === 'Na') showNa = !showNa;
+        if(type === 'Cl') showCl = !showCl;
+        updateView();
+    }
+</script>
+</body>
+</html>
